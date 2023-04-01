@@ -14,4 +14,16 @@
 `` Pistoleiro Parado ``
 
 ![Pistoleiro em ação parado](https://user-images.githubusercontent.com/87247824/229278682-6621fef4-2738-46e3-aa4d-0e4de0c61316.gif)
+-----------------------------------------------------------------------------------------
+
+#                                  Créditos
+-------------------
+* ``Artista:`` Eyb
+
+### Portfólio do ilustrador e animador: https://www.artstation.com/Eyb/profile
+
+--------------------
+* ``Programador:`` Will Martins
+ 
+ ### Portfólio do programador: https://github.com/MestreWilll
 
