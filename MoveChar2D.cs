@@ -8,18 +8,32 @@ public class MoveChar2D : MonoBehaviour
     public float moveSpeed;
     public float jumpForce;
     public LayerMask groundLayer;
-    public float checkDistance = 0.1f;
+    public float checkDistance = 0.5f;
 
     private bool isGrounded;
     private bool jumpRequested;
 
+    public Animator animator;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
+        if (Input.GetAxis("Horizontal") != 0)
+        {
+            // Esta correndo
+            animator.SetBool("Tacorrendo", true);
+        } 
+        else 
+        {
+            // Esta parado
+            animator.SetBool("Tacorrendo", false);
+        }
+
         // Movement
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         Vector2 movement = new Vector2(horizontalInput, 0).normalized;
@@ -36,7 +50,8 @@ public class MoveChar2D : MonoBehaviour
         }
 
         // Check if grounded
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, checkDistance, groundLayer);
+        Vector3 raycastOrigin = transform.position + new Vector3(0, -0.5f, 0);
+        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.down, checkDistance, groundLayer);
         isGrounded = hit.collider != null;
 
         // Request jump
