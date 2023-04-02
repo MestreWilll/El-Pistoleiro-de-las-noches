@@ -1,13 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
- // Mudar a class de acordo com o script 
- // rb2D não funciona
+// Consertado para não ir para cima
 public class MoveChar2D : MonoBehaviour
 {
     public Rigidbody2D rb;
     public float moveSpeed;
-    private Vector2 movement;
 
     void Start()
     {
@@ -17,13 +15,7 @@ public class MoveChar2D : MonoBehaviour
     void Update()
     {
         float horizontalInput = Input.GetAxisRaw("Horizontal");
-        float verticalInput = Input.GetAxisRaw("Vertical");
-
-        movement = new Vector2(horizontalInput, verticalInput).normalized;
-    }
-
-    void FixedUpdate()
-    {
-        rb.velocity = movement * moveSpeed;
+        Vector2 movement = new Vector2(horizontalInput, 0).normalized;
+        rb.velocity = new Vector2(movement.x * moveSpeed, rb.velocity.y);
     }
 }
