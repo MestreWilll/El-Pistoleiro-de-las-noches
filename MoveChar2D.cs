@@ -9,9 +9,13 @@ public class MoveChar2D : MonoBehaviour
     public float jumpForce;
     public LayerMask groundLayer;
     public float checkDistance = 0.5f;
+    public int platformLayer;
 
     private bool isGrounded;
     private bool jumpRequested;
+    private PlatformEffector2D effector;
+    public float waitTime = 0.5f;
+    private float timeToWait;
 
     public Animator animator;
 
@@ -19,6 +23,7 @@ public class MoveChar2D : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        effector = FindObjectOfType<PlatformEffector2D>();
     }
 
     void Update()
@@ -46,8 +51,9 @@ public class MoveChar2D : MonoBehaviour
         }
 
         Vector3 raycastOrigin = transform.position + new Vector3(0, -0.5f, 0);
-        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.down, checkDistance, groundLayer);
-        isGrounded = hit.collider != null;
+        RaycastHit2D hitGround = Physics2D.Raycast(raycastOrigin, Vector2.down, checkDistance, groundLayer);
+        RaycastHit2D hitPlatform = Physics2D.Raycast(raycastOrigin, Vector2.down, checkDistance, platformLayer);
+        isGrounded = hitGround.collider != null || hitPlatform.collider != null;
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
@@ -59,6 +65,35 @@ public class MoveChar2D : MonoBehaviour
         {
             animator.SetTrigger("Atirando");
         }
+
+        // Atravessar a plataforma
+        if (Input.GetKeyDown(KeyCode.S) && isGrounded)
+        {
+            StartCoroutine(FallThroughPlatform());
+        }
+
+        // Colidindo com a plataforma
+        if (Input.GetKeyUp(KeyCode.S))
+        {
+            timeToWait = waitTime;
+        }
+
+        if (timeToWait > 0)
+        {
+            effector.rotationalOffset = 180f;
+            timeToWait -= Time.deltaTime;
+        }
+        else
+        {
+            effector.rotationalOffset = 0f;
+        }
+    }
+
+    IEnumerator FallThroughPlatform()
+    {
+        Physics2D.IgnoreLayerCollision(gameObject.layer, platformLayer, true);
+        yield return new WaitForSeconds(0.5f);
+        Physics2D.IgnoreLayerCollision(gameObject.layer, platformLayer, false);
     }
 
     void FixedUpdate()
