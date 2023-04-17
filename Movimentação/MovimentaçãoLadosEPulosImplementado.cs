@@ -8,53 +8,65 @@ public class MoveChar2D : MonoBehaviour
     public float moveSpeed;
     public float jumpForce;
     public LayerMask groundLayer;
-    public int maxJumps = 2;
-    private int remainingJumps;
+    public float checkDistance = 0.5f;
+
     private bool isGrounded;
+    private bool jumpRequested;
+
+    public Animator animator;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        remainingJumps = maxJumps;
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && remainingJumps > 0)
+        if (Input.GetAxis("Horizontal") != 0)
         {
-            Jump();
-            remainingJumps--;
+            animator.SetBool("Tacorrendo", true);
+        }
+        else
+        {
+            animator.SetBool("Tacorrendo", false);
+        }
+
+        float horizontalInput = Input.GetAxisRaw("Horizontal");
+        Vector2 movement = new Vector2(horizontalInput, 0).normalized;
+        rb.velocity = new Vector2(movement.x * moveSpeed, rb.velocity.y);
+
+        if (horizontalInput > 0)
+        {
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+        else if (horizontalInput < 0)
+        {
+            transform.localScale = new Vector3(-Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
+        }
+
+        Vector3 raycastOrigin = transform.position + new Vector3(0, -0.5f, 0);
+        RaycastHit2D hit = Physics2D.Raycast(raycastOrigin, Vector2.down, checkDistance, groundLayer);
+        isGrounded = hit.collider != null;
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            jumpRequested = true;
+        }
+
+        // Adicionando a animação "Atirando" ao pressionar a tecla 'F'
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            animator.SetTrigger("Atirando");
         }
     }
 
     void FixedUpdate()
     {
-        float horizontalInput = Input.GetAxisRaw("Horizontal");
-        Vector2 movement = new Vector2(horizontalInput, 0).normalized;
-        rb.velocity = new Vector2(movement.x * moveSpeed, rb.velocity.y);
-    }
-
-    void Jump()
-    {
-        rb.velocity = new Vector2(rb.velocity.x, 0);
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Force);
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        if (jumpRequested)
         {
-            isGrounded = true;
-            remainingJumps = maxJumps;
-        }
-    }
-
-    void OnCollisionExit2D(Collision2D collision)
-    {
-        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
-        {
-            isGrounded = false;
+            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+            jumpRequested = false;
         }
     }
 }
-////////////////Não esquecer de declara as layers, e interliga pra fazer a colisão
